@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="canonical" href="https://pierrecochart.github.io/quickfav-favicon-maker/" />
+    
+<title>QuickFav Simple Favicon Maker | Pierre Cochart</title>
+    <style>
+        :root {
+            --google-blue: #1a73e8;
+            --google-red: #ea4335;
+            --google-yellow: #fbbc05;
+            --google-green: #34a853;
+            --surface: #ffffff;
+            --background: #f8f9fa;
+            --text-main: #202124;
+            --text-sub: #5f6368;
+            --outline: #dadce0;
+        }
+
+        body {
+            font-family: 'Google Sans', 'Segoe UI', Roboto, Arial, sans-serif;
+            background-color: var(--background);
+            color: var(--text-main);
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        .container {
+            background: var(--surface);
+            width: 100%;
+            max-width: 500px;
+            padding: 32px;
+            border-radius: 28px;
+            box-shadow: 0 1px 3px rgba(60,64,67,0.3), 0 4px 8px 3px rgba(60,64,67,0.15);
+        }
+
+        h1 { font-size: 24px; font-weight: 400; margin-bottom: 24px; text-align: center; }
+
+        /* Preview Area */
+        .preview-card {
+            background: #f1f3f4;
+            border-radius: 16px;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 32px;
+        }
+        canvas {
+            background: white;
+            border-radius: 4px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        }
+        .preview-label { margin-top: 12px; font-size: 14px; color: var(--text-sub); }
+
+        /* Input Styling */
+        .section-header { font-size: 14px; font-weight: 500; color: var(--google-blue); margin: 24px 0 12px; text-transform: uppercase; letter-spacing: 0.5px; }
+        
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+        .full { grid-column: span 2; }
+
+        select, input[type="text"] {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid var(--outline);
+            border-radius: 8px;
+            font-size: 16px;
+            background: white;
+            box-sizing: border-box;
+        }
+
+        /* Color Customization */
+        .color-well {
+            display: flex;
+            align-items: center;
+            border: 1px solid var(--outline);
+            padding: 8px;
+            border-radius: 8px;
+            gap: 12px;
+        }
+        input[type="color"] {
+            -webkit-appearance: none;
+            border: none; width: 32px; height: 32px;
+            cursor: pointer; background: none;
+        }
+        input[type="color"]::-webkit-color-swatch { border-radius: 50%; border: 1px solid var(--outline); }
+
+        /* Emoji Library */
+        .emoji-shelf {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 8px;
+            background: #f1f3f4;
+            padding: 12px;
+            border-radius: 12px;
+            max-height: 140px;
+            overflow-y: auto;
+        }
+        .emoji-btn {
+            font-size: 20px; padding: 8px; cursor: pointer; border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            transition: background 0.2s;
+        }
+        .emoji-btn:hover { background: #dee1e5; }
+        .emoji-btn.active { background: #d2e3fc; outline: 2px solid var(--google-blue); }
+
+        /* Actions */
+        .download-btn {
+            width: 100%;
+            background-color: var(--google-blue);
+            color: white;
+            border: none;
+            padding: 14px;
+            border-radius: 100px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            margin-top: 24px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.3);
+        }
+        .download-btn:hover { box-shadow: 0 4px 8px rgba(0,0,0,0.2); background-color: #1967d2; }
+
+        /* Donate Section */
+        .donate-section {
+            margin-top: 32px;
+            text-align: center;
+            border-top: 1px solid var(--outline);
+            padding-top: 24px;
+        }
+        .donate-text {
+            font-size: 13px;
+            color: var(--text-sub);
+            line-height: 1.5;
+            margin-bottom: 16px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>QuickFav Favicon Maker</h1>
+
+    <div class="preview-card">
+        <canvas id="favCanvas" width="32" height="32" style="width: 112px; height: 112px;"></canvas>
+        <span class="preview-label">Live Preview (32x32)</span>
+    </div>
+
+    <div class="section-header">Shape & Layout</div>
+    <div class="grid">
+        <select id="shape">
+            <option value="square">Square</option>
+            <option value="rounded">Rounded</option>
+            <option value="circle">Circle</option>
+        </select>
+        <select id="bgType">
+            <option value="solid">Solid</option>
+            <option value="grad">Gradient</option>
+        </select>
+    </div>
+
+    <div class="section-header">Colors</div>
+    <div class="grid">
+        <div class="color-well">
+            <input type="color" id="c1" value="#1a73e8">
+            <span>Primary</span>
+        </div>
+        <div class="color-well" id="c2Box" style="display:none;">
+            <input type="color" id="c2" value="#4285f4">
+            <span>Secondary</span>
+        </div>
+        <div class="color-well">
+            <input type="color" id="textColor" value="#ffffff">
+            <span>Content</span>
+        </div>
+    </div>
+
+    <div class="section-header">Content</div>
+    <div class="grid">
+        <select id="mode" class="full">
+            <option value="text">Custom Text</option>
+            <option value="emoji">Emoji Selection</option>
+        </select>
+    </div>
+
+    <div id="textInputWrap">
+        <input type="text" id="valText" value="G" maxlength="2" placeholder="AB">
+    </div>
+
+    <div id="emojiInputWrap" style="display:none;">
+        <div class="emoji-shelf" id="emojiGrid"></div>
+    </div>
+
+    <button class="download-btn" id="dlBtn">Download PNG</button>
+
+    <div class="donate-section">
+        <p class="donate-text">This tool is entirely free and runs locally in your browser. If it helped you out, consider supporting future development!</p>
+        <a href="https://www.buymeacoffee.com/PierreCochart" target="_blank">
+            <img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" style="height: 45px !important; width: auto !important;">
+        </a>
+    </div>
+</div>
+
+<script>
+    const canvas = document.getElementById('favCanvas');
+    const ctx = canvas.getContext('2d');
+    
+    const emojiList = ["🚀","🔥","⚡","⭐","🎨","💻","🛠️","🤖","💡","🎯","💎","✅","⚠️","❤️","☀️","🌈","🌊","🏠","🔑","📦","🍎"];
+    let activeEmoji = "🚀";
+
+    const ui = {
+        shape: document.getElementById('shape'),
+        mode: document.getElementById('mode'),
+        text: document.getElementById('valText'),
+        bgType: document.getElementById('bgType'),
+        c1: document.getElementById('c1'),
+        c2: document.getElementById('c2'),
+        textColor: document.getElementById('textColor')
+    };
+
+    // Build Emoji Grid
+    const grid = document.getElementById('emojiGrid');
+    emojiList.forEach(e => {
+        const span = document.createElement('span');
+        span.className = 'emoji-btn';
+        span.innerText = e;
+        span.onclick = () => {
+            activeEmoji = e;
+            document.querySelectorAll('.emoji-btn').forEach(b => b.classList.remove('active'));
+            span.classList.add('active');
+            draw();
+        };
+        grid.appendChild(span);
+    });
+
+    function draw() {
+        // Toggle UI logic
+        document.getElementById('textInputWrap').style.display = ui.mode.value === 'text' ? 'block' : 'none';
+        document.getElementById('emojiInputWrap').style.display = ui.mode.value === 'emoji' ? 'block' : 'none';
+        document.getElementById('c2Box').style.display = ui.bgType.value === 'grad' ? 'flex' : 'none';
+
+        ctx.clearRect(0, 0, 32, 32);
+        ctx.save();
+
+        // 1. Clipping Path
+        ctx.beginPath();
+        if (ui.shape.value === 'circle') {
+            ctx.arc(16, 16, 16, 0, Math.PI * 2);
+        } else if (ui.shape.value === 'rounded') {
+            const r = 8;
+            ctx.moveTo(r,0); ctx.arcTo(32,0,32,32,r); ctx.arcTo(32,32,0,32,r); ctx.arcTo(0,32,0,0,r); ctx.arcTo(0,0,32,0,r);
+        } else {
+            ctx.rect(0,0,32,32);
+        }
+        ctx.clip();
+
+        // 2. Background
+        if (ui.bgType.value === 'grad') {
+            const grd = ctx.createLinearGradient(0,0,0,32);
+            grd.addColorStop(0, ui.c1.value);
+            grd.addColorStop(1, ui.c2.value);
+            ctx.fillStyle = grd;
+        } else {
+            ctx.fillStyle = ui.c1.value;
+        }
+        ctx.fillRect(0,0,32,32);
+        ctx.restore();
+
+        // 3. Render Content
+        const isEmoji = ui.mode.value === 'emoji';
+        ctx.fillStyle = ui.textColor.value;
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.font = `bold ${isEmoji ? 21 : 16}px 'Google Sans', Arial, sans-serif`;
+        ctx.fillText(isEmoji ? activeEmoji : ui.text.value, 16, 17);
+    }
+
+    Object.values(ui).forEach(el => el.addEventListener('input', draw));
+    document.getElementById('dlBtn').onclick = () => {
+        const a = document.createElement('a');
+        a.download = 'favicon.png';
+        a.href = canvas.toDataURL();
+        a.click();
+    };
+
+    draw();
+</script>
+
+</body>
+</html>
